@@ -8,9 +8,17 @@ from mininet.net import Mininet
 from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel
 
+SHORT = "21ms"
+MEDIUM = "81ms"
+LONG = "162ms"
+
 class Dumbbell(Topo):
 	"Dumbbell for TCP Congestion Control"
-	def build(self,n=2):
+    def __init__(self,prop_delay):
+        super(Dumbbell,self).__init__()
+		self.prop_delay = prop_delay
+
+	def build(self):
 		#left side
 		# access and backbone switches
 		access_router_1 = self.addSwitch('s1')
@@ -39,12 +47,13 @@ class Dumbbell(Topo):
 		self.addLink(access_router_2,backbone_router_2)
 		
 		# add link between two backbone routers
-		self.addLink(backbone_router_1,backbone_router_2)
+		# use the propagation delay provided at construction
+		self.addLink(backbone_router_1,backbone_router_2,delay=self.prop_delay)
 
 
 def simple_test():
 	"Create and test a dumbell network"
-	dumbbell = Dumbbell()
+	dumbbell = Dumbbell(SHORT)
 	net = Mininet(dumbbell)
 	net.start()
 	print("Dumping host connections")
