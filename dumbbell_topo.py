@@ -6,6 +6,7 @@
 from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.util import dumpNodeConnections
+from mininet.link import TCLink
 from mininet.log import setLogLevel
 
 SHORT = "21ms"
@@ -14,8 +15,8 @@ LONG = "162ms"
 
 class Dumbbell(Topo):
     def __init__(self,prop_delay):
-        super(Dumbbell,self).__init__()
         self.prop_delay = prop_delay
+        super(Dumbbell,self).__init__()
 
     def build(self):
         #left side
@@ -44,6 +45,7 @@ class Dumbbell(Topo):
         self.addLink(receiver_2, access_router_2)
         # add link from access to back switch
         self.addLink(access_router_2,backbone_router_2)
+        d = self.prop_delay
 
         # add link between two backbone routers
         # use the propagation delay provided at construction
@@ -53,7 +55,7 @@ class Dumbbell(Topo):
 def simple_test():
     "Create and test a dumbell network"
     dumbbell = Dumbbell(SHORT)
-    net = Mininet(dumbbell)
+    net = Mininet(dumbbell, link=TCLink)
     net.start()
     print("Dumping host connections")
     dumpNodeConnections(net.hosts)
