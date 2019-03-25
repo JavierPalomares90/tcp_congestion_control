@@ -95,6 +95,8 @@ def simple_test():
     dumpNodeConnections(net.hosts)
     print("Testing network connectivity")
     net.pingAll()
+    print("running iperf")
+    net.iperf()
     net.stop()
 
 if __name__ =='__main__':
