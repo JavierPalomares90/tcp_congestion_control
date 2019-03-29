@@ -8,6 +8,8 @@ from mininet.net import Mininet
 from mininet.util import dumpNodeConnections
 from mininet.link import TCLink
 from mininet.log import setLogLevel
+from mininet.log import lg, info
+from mininet.util import irange, quietRun
 
 # delay in ms
 SHORT =  21
@@ -87,16 +89,16 @@ class Dumbbell(Topo):
 
 
 def simple_test():
-    "Create and test a dumbell network"
+    # Select TCP Reno
+    info("Selecting TCP Reno")
+    output = quietRun( 'sysctl -w net.ipv4.tcp_congestion_control=reno' )
+    assert 'reno' in output
+    info("Creating the a dumbell network")
     dumbbell = Dumbbell(SHORT)
     net = Mininet(dumbbell, link=TCLink)
     net.start()
-    print("Dumping host connections")
-    dumpNodeConnections(net.hosts)
-    print("Testing network connectivity")
-    net.pingAll()
-    print("running iperf")
-    net.iperf()
+    src,dest = net.hosts[0],net.hosts[3]
+    serverbw,clientbw= net.iperf([src,dest],seconds=10)
     net.stop()
 
 if __name__ =='__main__':
