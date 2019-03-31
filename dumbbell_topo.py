@@ -145,7 +145,6 @@ def dumbbell_test(tcp_alg,delay):
 
 def main():
     setLogLevel('info')
-    info("Selecting TCP Reno\n")
     # run reno over each of the 3 delays
     for tcp_alg in TCP_ALGS:
         for delay in DELAYS:
