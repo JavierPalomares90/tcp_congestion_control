@@ -117,7 +117,9 @@ def dumbbell_test():
     p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec))
     p2 = Process(target=run_iperf,args=(net,src2,dest2,trans_len_sec))
     p1.start()
-    #p2.start()
+    p2.start()
+    p1.join()
+    p2.join()
 
     net.stop()
 
