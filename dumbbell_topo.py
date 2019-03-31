@@ -155,8 +155,7 @@ def main():
             dumbbell_test(tcp_alg,delay)
 
 if __name__ =='__main__':
-    setLogLevel('info')
-    dumbbell_test()
+    main()
 
 
 
