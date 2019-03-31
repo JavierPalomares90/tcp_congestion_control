@@ -118,6 +118,7 @@ def dumbbell_test():
     p2 = Process(target=run_iperf,args=(net,src2,dest2,trans_len_sec))
     p1.start()
     p2.start()
+    # wait for the 2 threads to finish before calling .stop()
     p1.join()
     p2.join()
 
