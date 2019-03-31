@@ -126,7 +126,7 @@ def dumbbell_test():
     dest1 = net.hosts[2]
     dest2 = net.hosts[3]
     trans_len_sec = TRANSMISSION_DURATION_SECS
-    info("transmitting for {} seconds {}\n".format(trans_len_sec))
+    info("transmitting for seconds {}\n".format(trans_len_sec))
 
     # Get a proc pool to transmit src1->dest1, src2->dest2
     p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec))
