@@ -118,7 +118,7 @@ def dumbbell_test():
     dumbbell = Dumbbell(delay)
     net = Mininet(dumbbell, link=TCLink)
     file_name = "reno_short_delay"
-    info("starting tcp probe\n")
+    info("Starting tcp probe\n")
     start_tcp_probe(file_name)
     net.start()
     src1 = net.hosts[0]
@@ -126,7 +126,7 @@ def dumbbell_test():
     dest1 = net.hosts[2]
     dest2 = net.hosts[3]
     trans_len_sec = TRANSMISSION_DURATION_SECS
-    info("transmitting for seconds {}\n".format(trans_len_sec))
+    info("Transmitting for {} seconds.\n".format(trans_len_sec))
 
     # Get a proc pool to transmit src1->dest1, src2->dest2
     p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec))
@@ -138,7 +138,7 @@ def dumbbell_test():
     # wait for the 2 threads to finish before calling .stop()
     p1.join()
     p2.join()
-    info("transmission complete. shutting down\n")
+    info("Transmission complete. Shutting down\n")
 
     net.stop()
     stop_tcp_probe()
