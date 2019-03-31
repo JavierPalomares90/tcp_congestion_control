@@ -10,11 +10,15 @@ from mininet.link import TCLink
 from mininet.log import setLogLevel
 from mininet.log import lg, info
 from mininet.util import irange, quietRun
+from multiprocessing import Process
 
 # delay in ms
-SHORT =  21
-MEDIUM = 81
-LONG =  162
+SHORT_DELAY =  21
+MEDIUM_DELAY = 81
+LONG_DELAY =  162
+
+# how long iperf transmits in seconds
+TRANSMISSION_DURATION_SECS = 10
 
 MILLIS_TO_SEC = 1000
 B_TO_MB = 1.0 / (10e6)
@@ -87,27 +91,39 @@ class Dumbbell(Topo):
         # use the propagation delay provided at construction and the hardcoded speed
         self.addLink(backbone_router_1,backbone_router_2, bw = backbone_router_speed_Mbps, delay=d)
 
-def simple_test():
-    # Select TCP Reno
-    info("Selecting TCP Reno")
-    info('\n')
-    output = quietRun( 'sysctl -w net.ipv4.tcp_congestion_control=reno' )
-    assert 'reno' in output
-    info("Creating the a dumbell network")
-    info('\n')
-    dumbbell = Dumbbell(SHORT)
-    net = Mininet(dumbbell, link=TCLink)
-    net.start()
-    src,dest = net.hosts[0],net.hosts[3]
-    serverbw,clientbw= net.iperf([src,dest],seconds=10)
+def run_iperf(mininet, source,destination, duration_secs):
+    serverbw,clientbw =  mininet.iperf([source,destination], seconds=duration_secs)
     info("server bandwith:")
     info(serverbw,'\n')
     info('\n')
+
+def dumbbell_test():
+    # Select TCP Reno
+    info("Selecting TCP Reno\n")
+    output = quietRun( 'sysctl -w net.ipv4.tcp_congestion_control=reno' )
+    assert 'reno' in output
+    delay = SHORT_DELAY
+    info("Creating the a dumbell network with delay={}\n".format(delay))
+    dumbbell = Dumbbell(delay)
+    net = Mininet(dumbbell, link=TCLink)
+    net.start()
+    src1 = net.hosts[0]
+    src2 = net.hosts[1]
+    dest1 = net.hosts[2]
+    dest2 = net.hosts[3]
+    trans_len_sec = TRANSMISSION_DURATION_SECS
+
+    # Get a proc pool to transmit src1->dest1, src2->dest2
+    p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec))
+    p2 = Process(target=run_iperf,args=(net,src2,dest2,trans_len_sec))
+    p1.start()
+    #p2.start()
+
     net.stop()
 
 if __name__ =='__main__':
     setLogLevel('info')
-    simple_test()
+    dumbbell_test()
 
 
 
