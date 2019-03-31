@@ -103,7 +103,7 @@ def run_iperf(mininet, source,destination, duration_secs):
 def start_tcp_probe(file_name):
     os.system("rmmod tcp_probe 1> /dev/null 2>&1; "
               "modprobe tcp_probe full=1 port=5001 bufsize=10240")
-    Popen("cat /proc/net/tcpprobe > ./tcp_probe_{}.txt".format(file), shell=True)
+    Popen("cat /proc/net/tcpprobe > ./tcp_probe_{}.txt".format(file_name), shell=True)
 
 def stop_tcp_probe():
     os.system("killall -9 cat; rmmod tcp_probe")
