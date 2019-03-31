@@ -87,18 +87,22 @@ class Dumbbell(Topo):
         # use the propagation delay provided at construction and the hardcoded speed
         self.addLink(backbone_router_1,backbone_router_2, bw = backbone_router_speed_Mbps, delay=d)
 
-
 def simple_test():
     # Select TCP Reno
     info("Selecting TCP Reno")
+    info('\n')
     output = quietRun( 'sysctl -w net.ipv4.tcp_congestion_control=reno' )
     assert 'reno' in output
     info("Creating the a dumbell network")
+    info('\n')
     dumbbell = Dumbbell(SHORT)
     net = Mininet(dumbbell, link=TCLink)
     net.start()
     src,dest = net.hosts[0],net.hosts[3]
     serverbw,clientbw= net.iperf([src,dest],seconds=10)
+    info("server bandwith:")
+    info(serverbw,'\n')
+    info('\n')
     net.stop()
 
 if __name__ =='__main__':
