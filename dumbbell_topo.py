@@ -11,6 +11,8 @@ from mininet.log import setLogLevel
 from mininet.log import lg, info
 from mininet.util import irange, quietRun
 from multiprocessing import Process
+import os
+from subprocess import Popen
 
 # delay in ms
 SHORT_DELAY =  21
@@ -97,6 +99,15 @@ def run_iperf(mininet, source,destination, duration_secs):
     info(serverbw,'\n')
     info('\n')
 
+
+def start_tcp_probe(file_name):
+    os.system("rmmod tcp_probe 1> /dev/null 2>&1; "
+              "modprobe tcp_probe full=1 port=5001 bufsize=10240")
+    Popen("cat /proc/net/tcpprobe > ./tcp_probe_{}.txt".format(file), shell=True)
+
+def stop_tcp_probe():
+    os.system("killall -9 cat; rmmod tcp_probe")
+
 def dumbbell_test():
     # Select TCP Reno
     info("Selecting TCP Reno\n")
@@ -106,6 +117,8 @@ def dumbbell_test():
     info("Creating the a dumbell network with delay={}\n".format(delay))
     dumbbell = Dumbbell(delay)
     net = Mininet(dumbbell, link=TCLink)
+    file_name = "reno_short_delay"
+    start_tcp_probe(file_name)
     net.start()
     src1 = net.hosts[0]
     src2 = net.hosts[1]
@@ -116,6 +129,8 @@ def dumbbell_test():
     # Get a proc pool to transmit src1->dest1, src2->dest2
     p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec))
     p2 = Process(target=run_iperf,args=(net,src2,dest2,trans_len_sec))
+
+
     p1.start()
     p2.start()
     # wait for the 2 threads to finish before calling .stop()
@@ -123,6 +138,7 @@ def dumbbell_test():
     p2.join()
 
     net.stop()
+    stop_tcp_probe()
 
 if __name__ =='__main__':
     setLogLevel('info')
