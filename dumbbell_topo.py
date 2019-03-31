@@ -112,8 +112,6 @@ def stop_tcp_probe():
     os.system("killall -9 cat; rmmod tcp_probe")
 
 def dumbbell_test(tcp_alg,delay):
-    # Select TCP Reno
-    info("Selecting TCP Reno\n")
     output = quietRun( 'sysctl -w net.ipv4.tcp_congestion_control={}'.format(tcp_alg))
     assert tcp_alg in output
     info("Creating the a dumbell network with delay={}\n".format(delay))
