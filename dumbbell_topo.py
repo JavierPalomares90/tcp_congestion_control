@@ -18,9 +18,12 @@ from subprocess import Popen
 SHORT_DELAY =  21
 MEDIUM_DELAY = 81
 LONG_DELAY =  162
+DELAYS = [SHORT_DELAY, MEDIUM_DELAY, LONG_DELAY]
+
+TCP_ALGS=['reno','cubic','bic','westwood']
 
 # how long iperf transmits in seconds
-TRANSMISSION_DURATION_SECS = 10
+TRANSMISSION_DURATION_SECS = 100
 
 MILLIS_TO_SEC = 1000
 B_TO_MB = 1.0 / (10e6)
@@ -108,16 +111,15 @@ def start_tcp_probe(file_name):
 def stop_tcp_probe():
     os.system("killall -9 cat; rmmod tcp_probe")
 
-def dumbbell_test():
+def dumbbell_test(tcp_alg,delay):
     # Select TCP Reno
     info("Selecting TCP Reno\n")
-    output = quietRun( 'sysctl -w net.ipv4.tcp_congestion_control=reno' )
-    assert 'reno' in output
-    delay = SHORT_DELAY
+    output = quietRun( 'sysctl -w net.ipv4.tcp_congestion_control={}'.format(tcp_alg))
+    assert tcp_alg in output
     info("Creating the a dumbell network with delay={}\n".format(delay))
     dumbbell = Dumbbell(delay)
     net = Mininet(dumbbell, link=TCLink)
-    file_name = "reno_short_delay"
+    file_name = "{}_{}_ms_delay".format(tcp_alg,delay)
     info("Starting tcp probe\n")
     start_tcp_probe(file_name)
     net.start()
@@ -142,6 +144,15 @@ def dumbbell_test():
 
     net.stop()
     stop_tcp_probe()
+
+def main():
+    setLogLevel('info')
+    info("Selecting TCP Reno\n")
+    # run reno over each of the 3 delays
+    for tcp_alg in TCP_ALGS:
+        for delay in DELAYS:
+            info("Testing TCP {} with delay to {} ms\n".format(tcp_alg,delay))
+            dumbbell_test(tcp_alg,delay)
 
 if __name__ =='__main__':
     setLogLevel('info')
