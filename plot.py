@@ -65,7 +65,7 @@ def plot_tcp_data(tcp_alg,delay):
     ax.scatter(times2,cwnds2,c='b',label='source2<->receiver2',linewidths=0.1,alpha=.5)
     plt.title('Cwnd vs time for {} at {} ms delay'.format(tcp_alg,delay))
     plt.xlabel('Time (seconds)')
-    plt.ylabel('send congestion window')
+    plt.ylabel('Send congestion window (MSS)')
     plt.legend(loc = 'upper right')
     plt.savefig('tcp_probe_{}_{}_ms_delay.png'.format(tcp_alg,delay))
     plt.show()
