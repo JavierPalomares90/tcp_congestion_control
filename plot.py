@@ -21,8 +21,10 @@ def plot_tcp_data(tcp_alg,delay):
     receiver2 = '10.0.0.4'
     times1 = []
     cwnds1 = []
+    bw1 = []
     times2 = []
     cwnds2 = []
+    bw2 = []
     with open(file_name,'r') as f:
         line = f.readline()
         while line:
@@ -48,24 +50,37 @@ def plot_tcp_data(tcp_alg,delay):
             # Smoothed estimated RTT for this connection (in ms)
             rtt = int(tokens[9])
             receiver_window = int(tokens[10])
+            # compute the bandwith in kilobytes
+            bw = cwnd * bytes_in_packet /1024
             if sender1 in sender or sender1 in receiver:
                 times1.append(time)
                 cwnds1.append(cwnd)
+                bw1.append(bw)
             elif sender2 in sender or sender2 in receiver:
                 times2.append(time)
                 cwnds2.append(cwnd)
+                bw2.append(bw)
             else:
                 raise Exception('error parsing line' + line)
 
             line = f.readline()
     fig = plt.figure()
-    ax = fig.add_subplot(111)
+    ax = fig.add_subplot(211)
 
     ax.scatter(times1,cwnds1,c='r',label='source1<->receiver1',linewidths=0.1,alpha=.5)
     ax.scatter(times2,cwnds2,c='b',label='source2<->receiver2',linewidths=0.1,alpha=.5)
     plt.title('Cwnd vs time for {} at {} ms delay'.format(tcp_alg,delay))
     plt.xlabel('Time (seconds)')
     plt.ylabel('Send congestion window (MSS)')
+    plt.legend(loc = 'upper right')
+
+    ax2 = fig.add_subplot(212)
+
+    ax2.scatter(times1,bw1,c='r',label='source1<->receiver1',linewidths=0.1,alpha=.5)
+    ax2.scatter(times2,bw2,c='b',label='source2<->receiver2',linewidths=0.1,alpha=.5)
+    plt.title('Bandwidth vs time for {} at {} ms delay'.format(tcp_alg,delay))
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Bandwith (Kbps)')
     plt.legend(loc = 'upper right')
     plt.savefig('tcp_probe_{}_{}_ms_delay.png'.format(tcp_alg,delay))
     plt.show()
