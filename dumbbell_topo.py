@@ -103,7 +103,7 @@ class Dumbbell(Topo):
 def run_iperf(mininet, source, destination, duration_secs,portNum,tcp_alg,file_name):
     info('Starting iperf from source {} to destination {}\n'.format(source,destination))
     info('Starting the destination on port {}\n'.format(portNum))
-    destination.cmd('iperf -s -p {}&'.format(portNum))
+    p2 = destination.popen('iperf -s -p {}&'.format(portNum),shell=True)
 
     info('Starting the source\n')
     # may have to use popen instead
@@ -117,6 +117,8 @@ def run_iperf(mininet, source, destination, duration_secs,portNum,tcp_alg,file_n
     p_status = p.wait()
     info('output:{}, err={},status={}'.format(output,err,p_status))
     f.close()
+    p2.kill()
+
 
 def start_tcp_probe(file_name):
     os.system("rmmod tcp_probe 1> /dev/null 2>&1; "
@@ -150,12 +152,11 @@ def dumbbell_test(tcp_alg,delay):
     dest1 = net.hosts[2]
     dest2 = net.hosts[3]
     trans_len_sec = TRANSMISSION_DURATION_SECS
-    portNum = PORT
     info("Transmitting for {} seconds.\n".format(trans_len_sec))
 
     # Get a proc pool to transmit src1->dest1, src2->dest2
-    p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec,portNum,tcp_alg,iperf_file_name1))
-    p2 = Process(target=run_iperf,args=(net,src2,dest2,trans_len_sec,portNum,tcp_alg,iperf_file_name2))
+    p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec,5001,tcp_alg,iperf_file_name1))
+    p2 = Process(target=run_iperf,args=(net,src2,dest2,trans_len_sec,5002,tcp_alg,iperf_file_name2))
 
 
     p1.start()
