@@ -107,7 +107,7 @@ def run_iperf(mininet, source, destination, duration_secs,portNum,tcp_alg,file_n
 
     info('Starting the source\n')
     # may have to use popen instead
-    destinationIP = destination.IP
+    destinationIP = destination.IP()
     cmd = 'iperf -c {} -p {} -i 1 -w 16m -Z {} -t {} > {}.txt'.format(destinationIP,portNum,tcp_alg,duration_secs,file_name)
     info('Souce executing:{}\n'.format(cmd))
     p = source.popen(cmd)
