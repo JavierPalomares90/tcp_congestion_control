@@ -3,6 +3,7 @@
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from datetime import datetime as dt
 
 SHORT_DELAY =  21
 MEDIUM_DELAY = 81
@@ -10,6 +11,7 @@ LONG_DELAY =  162
 DELAYS = [SHORT_DELAY, MEDIUM_DELAY, LONG_DELAY]
 
 TCP_ALGS=['reno','cubic','bic','westwood']
+TIMESTAMP_FORMAT='%Y%m%d%H%M%S'
 
 def plot_tcp_data(tcp_alg,delay):
     file_name = 'tcp_probe_{}_{}_ms_delay.txt'.format(tcp_alg,delay)
@@ -32,15 +34,33 @@ def plot_tcp_data(tcp_alg,delay):
     plt.legend(['Source1->Host1','Source2->Host2'],loc = 'upper right')
     plt.show()
 
-def plot_ipef_data(tcp_alg,delay):
+
+def plot_iperf_data(tcp_alg,delay):
     iperf_file_name1 = "iperf_{}_{}_ms_delay_1".format(tcp_alg,delay)
     iperf_file_name2 = "iperf_{}_{}_ms_delay_2".format(tcp_alg,delay)
+    column_names = ['timestamp','source_ip','source_port','destination_ip','destination_port','group_ID','interval','transferred_bytes','bits_per_sec']
+    df1 = pd.read_csv(iperf_file_name1,names=column_names)
+    df2 = pd.read_csv(iperf_file_name2,names=column_names)
+
+    df1['timestamp'] = df1['timestamp'].apply(lambda x: dt.strptime(str(x),TIMESTAMP_FORMAT) )
+    df2['timestamp'] = df2['timestamp'].apply(lambda x: dt.strptime(str(x),TIMESTAMP_FORMAT) )
+    for item,row in df1.iterrows():
+        i1 = item
+        r1 = row
+
+    ax = df1.plot(x='timestamp',y='bits_per_sec',title='Bandwidth for {} at ms delay'.format(tcp_alg,delay),color='r')
+    df2.plot(ax = ax, x='timestamp',y='bits_per_sec',title='Bandwidth for {} at ms delay'.format(tcp_alg,delay))
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Bandwidth (bps)')
+    plt.legend(['Source1->Host1','Source2->Host2'],loc = 'upper right')
+    plt.show()
+
 
 def main():
     for tcp_alg in TCP_ALGS:
         for delay in DELAYS:
-            plot_tcp_data(tcp_alg,delay)
             plot_iperf_data(tcp_alg,delay)
+            plot_tcp_data(tcp_alg,delay)
 
 
 
