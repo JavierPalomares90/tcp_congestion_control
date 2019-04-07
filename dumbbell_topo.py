@@ -136,7 +136,7 @@ def dumbbell_test(tcp_alg,delay):
     file_name = "{}_{}_ms_delay".format(tcp_alg,delay)
     iperf_file_name1 = "iperf_{}_{}_ms_delay_1".format(tcp_alg,delay)
     iperf_file_name2 = "iperf_{}_{}_ms_delay_2".format(tcp_alg,delay)
-    info("Starting the topology")
+    info("Starting the topology\n")
     net.start()
     info("Dumping node connections\n")
     dumpNodeConnections(net.hosts)
@@ -156,6 +156,7 @@ def dumbbell_test(tcp_alg,delay):
 
 
     p1.start()
+    info("Waiting for {} secs before starting second connection\n".format(SECOND_TRANSMISSION_DELAY_SECS))
     # wait for SECOND_TRANSMISSION_DELAY_SECS before starting the second transmission
     time.sleep(SECOND_TRANSMISSION_DELAY_SECS)
     p2.start()
