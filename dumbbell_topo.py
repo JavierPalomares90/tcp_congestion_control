@@ -115,7 +115,7 @@ def run_iperf(mininet, source, destination, duration_secs,portNum,tcp_alg,file_n
     # wait until command is done
     (output, err) = p.communicate()
     p_status = p.wait()
-    info('output:{}, err={},status={}'.format(output,err,p_status)
+    info('output:{}, err={},status={}'.format(output,err,p_status))
     f.close()
 
 def start_tcp_probe(file_name):
