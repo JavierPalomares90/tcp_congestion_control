@@ -19,14 +19,6 @@ def plot_tcp_data(tcp_alg,delay):
     # path two 10.0.0.4 <-> 10.0.0.2 s2<->r2
     sender1 = '10.0.0.1'
     sender2 = '10.0.0.2'
-    receiver1 = '10.0.0.3'
-    receiver2 = '10.0.0.4'
-    times1 = []
-    cwnds1 = []
-    bw1 = []
-    times2 = []
-    cwnds2 = []
-    bw2 = []
     df = pd.read_csv(file_name,names=column_names,delim_whitespace=True)
     # only look at messages from the senders (not from the receivers)
     connection1 = df[df['Sender'].str.match(sender1)]
@@ -40,21 +32,15 @@ def plot_tcp_data(tcp_alg,delay):
     plt.legend(['Source1->Host1','Source2->Host2'],loc = 'upper right')
     plt.show()
 
-    ax2 = fig.add_subplot(212)
-
-    ax2.scatter(times1,bw1,c='r',label='source1<->receiver1',linewidths=0.1,alpha=.5)
-    ax2.scatter(times2,bw2,c='b',label='source2<->receiver2',linewidths=0.1,alpha=.5)
-    plt.title('Bandwidth vs time for {} at {} ms delay'.format(tcp_alg,delay))
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('Bandwith (Kbps)')
-    plt.legend(loc = 'upper right')
-    plt.savefig('tcp_probe_{}_{}_ms_delay.png'.format(tcp_alg,delay))
-    plt.show()
+def plot_ipef_data(tcp_alg,delay):
+    iperf_file_name1 = "iperf_{}_{}_ms_delay_1".format(tcp_alg,delay)
+    iperf_file_name2 = "iperf_{}_{}_ms_delay_2".format(tcp_alg,delay)
 
 def main():
     for tcp_alg in TCP_ALGS:
         for delay in DELAYS:
             plot_tcp_data(tcp_alg,delay)
+            plot_iperf_data(tcp_alg,delay)
 
 
 
