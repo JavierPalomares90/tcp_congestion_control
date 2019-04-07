@@ -41,6 +41,9 @@ def plot_iperf_data(tcp_alg,delay):
     column_names = ['timestamp','source_ip','source_port','destination_ip','destination_port','group_ID','interval','transferred_bytes','bits_per_sec']
     df1 = pd.read_csv(iperf_file_name1,names=column_names)
     df2 = pd.read_csv(iperf_file_name2,names=column_names)
+    # remove the rows with 0 bandwidth
+    df1 = df1[df1['bits_per_sec'] != 0]
+    df2 = df2[df2['bits_per_sec'] != 0]
     # only look at messages from the senders (not from the receivers)
     sender1 = '10.0.0.1'
     sender2 = '10.0.0.2'
