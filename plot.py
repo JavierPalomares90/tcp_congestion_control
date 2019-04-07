@@ -37,7 +37,7 @@ def plot_tcp_data(tcp_alg,delay):
     connection2.plot(ax=ax,x='Time',y='Cwnd', title='Cwnd vs time for {} at {} ms delay'.format(tcp_alg,delay))
     plt.xlabel('Time (seconds)')
     plt.ylabel('Send congestion window (MSS)')
-    plt.legend(loc = 'upper right')
+    plt.legend(['Source1->Host1','Source2->Host2'],loc = 'upper right')
     plt.show()
 
     ax2 = fig.add_subplot(212)
