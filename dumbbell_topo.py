@@ -102,20 +102,18 @@ class Dumbbell(Topo):
 
 def run_iperf(mininet, source, destination, duration_secs,portNum,tcp_alg,file_name):
     info('Starting iperf from source {} to destination {}\n'.format(source,destination))
-    info('\n')
     info('Starting the destination on port {}\n'.format(portNum))
-    info('\n')
     destination.cmd('iperf -s -p {}&'.format(portNum))
 
     info('Starting the source\n')
-    info('\n')
     # may have to use popen instead
     destinationIP = destination.IP
-    source.cmd('iperf -c {} -p {} -i 1 -w 16m -Z {} -t {} > {}.txt'.format(destinationIP,portNum,tcp_alg,duration_secs,file_name))
-    info('iperf running from source {} to destination {}. Saving to {}.txt'.format(source,destination,file_name))
-    info('\n')
-    info('\n')
-
+    cmd = 'iperf -c {} -p {} -i 1 -w 16m -Z {} -t {} > {}.txt'.format(destinationIP,portNum,tcp_alg,duration_secs,file_name)
+    info('Souce executing:{}\n'.format(cmd))
+    p = source.popen(cmd)
+    # wait until command is done
+    (output, err) = p.communicate()
+    p_status = p.wait()
 
 def start_tcp_probe(file_name):
     os.system("rmmod tcp_probe 1> /dev/null 2>&1; "
