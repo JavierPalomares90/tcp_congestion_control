@@ -108,7 +108,7 @@ def run_iperf(mininet, source, destination, duration_secs,portNum,tcp_alg,file_n
     info('Starting the source\n')
     # may have to use popen instead
     destinationIP = destination.IP()
-    cmd = 'iperf -c {} -p {} -i 1 -w 16m -Z {} -t {} -y c'.format(destinationIP,portNum,tcp_alg,duration_secs,file_name)
+    cmd = 'iperf -c {} -p {} -i 1 -w 16m -Z {} -t {} -y c'.format(destinationIP,portNum,tcp_alg,duration_secs)
     f = open(file_name,'w')
     info('Source executing:{}\n'.format(cmd))
     p = source.popen(cmd, stdout=f)
@@ -135,8 +135,8 @@ def dumbbell_test(tcp_alg,delay):
     net = Mininet(dumbbell, link=TCLink)
 
     file_name = "{}_{}_ms_delay".format(tcp_alg,delay)
-    iperf_file_name1 = "iperf_{}_{}_ms_delay_1".format(tcp_alg,delay)
-    iperf_file_name2 = "iperf_{}_{}_ms_delay_2".format(tcp_alg,delay)
+    iperf_file_name1 = "iperf_{}_{}_ms_delay_1.txt".format(tcp_alg,delay)
+    iperf_file_name2 = "iperf_{}_{}_ms_delay_2.txt".format(tcp_alg,delay)
     info("Starting the topology\n")
     net.start()
     info("Dumping node connections\n")
