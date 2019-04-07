@@ -108,12 +108,15 @@ def run_iperf(mininet, source, destination, duration_secs,portNum,tcp_alg,file_n
     info('Starting the source\n')
     # may have to use popen instead
     destinationIP = destination.IP()
-    cmd = 'iperf -c {} -p {} -i 1 -w 16m -Z {} -t {} -y c -o {}.txt'.format(destinationIP,portNum,tcp_alg,duration_secs,file_name)
-    info('Souce executing:{}\n'.format(cmd))
-    p = source.popen(cmd)
+    cmd = 'iperf -c {} -p {} -i 1 -w 16m -Z {} -t {} -y c'.format(destinationIP,portNum,tcp_alg,duration_secs,file_name)
+    f = open(file_name,'w')
+    info('Source executing:{}\n'.format(cmd))
+    p = source.popen(cmd, stdout=f)
     # wait until command is done
     (output, err) = p.communicate()
     p_status = p.wait()
+    info('output:{}, err={},status={}'.format(output,err,p_status)
+    f.close()
 
 def start_tcp_probe(file_name):
     os.system("rmmod tcp_probe 1> /dev/null 2>&1; "
