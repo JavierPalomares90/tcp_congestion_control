@@ -41,12 +41,19 @@ def plot_iperf_data(tcp_alg,delay):
     column_names = ['timestamp','source_ip','source_port','destination_ip','destination_port','group_ID','interval','transferred_bytes','bits_per_sec']
     df1 = pd.read_csv(iperf_file_name1,names=column_names)
     df2 = pd.read_csv(iperf_file_name2,names=column_names)
+    # only look at messages from the senders (not from the receivers)
+    sender1 = '10.0.0.1'
+    sender2 = '10.0.0.2'
+    df1 = df1[df1['source_ip'].str.match(sender1)]
+    df2 = df2[df2['source_ip'].str.match(sender2)]
 
+
+    # convert to a timestamp object
     df1['timestamp'] = df1['timestamp'].apply(lambda x: dt.strptime(str(x),TIMESTAMP_FORMAT) )
     df2['timestamp'] = df2['timestamp'].apply(lambda x: dt.strptime(str(x),TIMESTAMP_FORMAT) )
-    for item,row in df1.iterrows():
-        i1 = item
-        r1 = row
+    # get the start ts
+    start_ts = df1.iloc[0]['timestamp']
+    next_ts = df1.iloc[1]['timestamp']
 
     ax = df1.plot(x='timestamp',y='bits_per_sec',title='Bandwidth for {} at ms delay'.format(tcp_alg,delay),color='r')
     df2.plot(ax = ax, x='timestamp',y='bits_per_sec',title='Bandwidth for {} at ms delay'.format(tcp_alg,delay))
