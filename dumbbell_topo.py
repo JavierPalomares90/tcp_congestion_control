@@ -20,6 +20,7 @@ SHORT_DELAY =  21
 MEDIUM_DELAY = 81
 LONG_DELAY =  162
 DELAYS = [SHORT_DELAY, MEDIUM_DELAY, LONG_DELAY]
+PORT = 5001
 
 SECOND_TRANSMISSION_DELAY_SECS = 25
 
@@ -99,10 +100,20 @@ class Dumbbell(Topo):
         # use the propagation delay provided at construction and the hardcoded speed
         self.addLink(backbone_router_1,backbone_router_2, bw = backbone_router_speed_Mbps, delay=d)
 
-def run_iperf(mininet, source, destination, duration_secs):
-    serverbw,clientbw =  mininet.iperf([source,destination], seconds=duration_secs)
-    info("server bandwith:")
-    info(serverbw,'\n')
+def run_iperf(mininet, source, destination, duration_secs,portNum,tcp_alg,file_name):
+    info('Starting iperf from source {} to destination {}\n'.format(source,destination))
+    info('\n')
+    info('Starting the destination on port {}\n'.format(portNum))
+    info('\n')
+    destination.cmd('iperf -s -p {}&'.format(portNum))
+
+    info('Starting the source\n')
+    info('\n')
+    # may have to use popen instead
+    destinationIP = destination.IP
+    source.cmd('iperf -c {} -p {} -i 1 -w 16m -Z {} -t {}>{}.txt'.format(destinationIP,portNum,tcp_alg,duration_secs,file_name))
+    info('iperf running from source {} to destination {}'.format(source,destination))
+    info('\n')
     info('\n')
 
 
@@ -115,30 +126,38 @@ def stop_tcp_probe():
     os.system("killall -9 cat; rmmod tcp_probe")
 
 def dumbbell_test(tcp_alg,delay):
+    info("Setting tcp alg to {}\n".format(tcp_alg))
     output = quietRun( 'sysctl -w net.ipv4.tcp_congestion_control={}'.format(tcp_alg))
     assert tcp_alg in output
     info("Creating the a dumbell network with delay={}\n".format(delay))
     dumbbell = Dumbbell(delay)
     net = Mininet(dumbbell, link=TCLink)
+
     file_name = "{}_{}_ms_delay".format(tcp_alg,delay)
+    iperf_file_name1 = "iperf_{}_{}_ms_delay_1".format(tcp_alg,delay)
+    iperf_file_name2 = "iperf_{}_{}_ms_delay_2".format(tcp_alg,delay)
+    info("Starting the topology")
+    net.start()
+    info("Dumping node connections\n")
+    dumpNodeConnections(net.hosts)
     info("Starting tcp probe\n")
     start_tcp_probe(file_name)
-    net.start()
     src1 = net.hosts[0]
     src2 = net.hosts[1]
     dest1 = net.hosts[2]
     dest2 = net.hosts[3]
     trans_len_sec = TRANSMISSION_DURATION_SECS
+    portNum = PORT
     info("Transmitting for {} seconds.\n".format(trans_len_sec))
 
     # Get a proc pool to transmit src1->dest1, src2->dest2
-    p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec))
-    # wait for SECOND_TRANSMISSION_DELAY_SECS before starting the second transmission
-    time.sleep(SECOND_TRANSMISSION_DELAY_SECS)
-    p2 = Process(target=run_iperf,args=(net,src2,dest2,trans_len_sec))
+    p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec,portNum,tcp_alg,iperf_file_name1))
+    p2 = Process(target=run_iperf,args=(net,src2,dest2,trans_len_sec,portNum,tcp_alg,iperf_file_name2))
 
 
     p1.start()
+    # wait for SECOND_TRANSMISSION_DELAY_SECS before starting the second transmission
+    time.sleep(SECOND_TRANSMISSION_DELAY_SECS)
     p2.start()
     # wait for the 2 threads to finish before calling .stop()
     p1.join()
