@@ -128,6 +128,8 @@ def stop_tcp_probe():
 
 def dumbbell_test(tcp_alg,delay):
     info("Setting tcp alg to {}\n".format(tcp_alg))
+    out = quietRun('mn -c')
+    info('mn -c: {}\n'.format(out))
     output = quietRun( 'sysctl -w net.ipv4.tcp_congestion_control={}'.format(tcp_alg))
     assert tcp_alg in output
     info("Creating the a dumbell network with delay={}\n".format(delay))
