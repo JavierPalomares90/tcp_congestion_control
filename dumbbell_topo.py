@@ -12,6 +12,7 @@ from mininet.log import lg, info
 from mininet.util import irange, quietRun
 from multiprocessing import Process
 import os
+import time
 from subprocess import Popen
 
 # delay in ms
@@ -19,6 +20,8 @@ SHORT_DELAY =  21
 MEDIUM_DELAY = 81
 LONG_DELAY =  162
 DELAYS = [SHORT_DELAY, MEDIUM_DELAY, LONG_DELAY]
+
+SECOND_TRANSMISSION_DELAY_SECS = 25
 
 TCP_ALGS=['reno','cubic','bic','westwood']
 
@@ -96,7 +99,7 @@ class Dumbbell(Topo):
         # use the propagation delay provided at construction and the hardcoded speed
         self.addLink(backbone_router_1,backbone_router_2, bw = backbone_router_speed_Mbps, delay=d)
 
-def run_iperf(mininet, source,destination, duration_secs):
+def run_iperf(mininet, source, destination, duration_secs):
     serverbw,clientbw =  mininet.iperf([source,destination], seconds=duration_secs)
     info("server bandwith:")
     info(serverbw,'\n')
@@ -130,6 +133,8 @@ def dumbbell_test(tcp_alg,delay):
 
     # Get a proc pool to transmit src1->dest1, src2->dest2
     p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec))
+    # wait for SECOND_TRANSMISSION_DELAY_SECS before starting the second transmission
+    time.sleep(SECOND_TRANSMISSION_DELAY_SECS)
     p2 = Process(target=run_iperf,args=(net,src2,dest2,trans_len_sec))
 
 
