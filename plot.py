@@ -27,12 +27,14 @@ def plot_tcp_data(tcp_alg,delay):
     connection1 = df[df['Sender'].str.match(sender1)]
     connection2 = df[df['Sender'].str.match(sender2)]
 
-    fig = plt.figure()
     ax = connection1.plot(x='Time',y='Cwnd', title='Cwnd vs time for {} at {} ms delay'.format(tcp_alg,delay),color='r')
     connection2.plot(ax=ax,x='Time',y='Cwnd', title='Cwnd vs time for {} at {} ms delay'.format(tcp_alg,delay))
     plt.xlabel('Time (seconds)')
     plt.ylabel('Send congestion window (MSS)')
     plt.legend(['Source1->Host1','Source2->Host2'],loc = 'upper right')
+
+    save_file = 'cwnd_{}_{}_ms_delay.png'.format(tcp_alg,delay)
+    plt.savefig(save_file)
     plt.show()
 
 
@@ -69,6 +71,8 @@ def plot_iperf_data(tcp_alg,delay):
     plt.xlabel('Time (seconds)')
     plt.ylabel('Bandwidth (bps)')
     plt.legend(['Source1->Host1','Source2->Host2'],loc = 'upper right')
+    save_file = "bandwidth_{}_{}_ms_delay_1.txt".format(tcp_alg,delay)
+    plt.savefig(save_file)
     plt.show()
 
 
