@@ -71,7 +71,7 @@ def plot_iperf_data(tcp_alg,delay):
     plt.xlabel('Time (seconds)')
     plt.ylabel('Bandwidth (bps)')
     plt.legend(['Source1->Host1','Source2->Host2'],loc = 'upper right')
-    save_file = "bandwidth_{}_{}_ms_delay_1.png".format(tcp_alg,delay)
+    save_file = "bandwidth_{}_{}_ms_delay.png".format(tcp_alg,delay)
     plt.savefig(save_file)
     plt.show()
 
