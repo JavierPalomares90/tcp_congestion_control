@@ -66,8 +66,8 @@ def plot_iperf_data(tcp_alg,delay):
         t = row['timestamp'] - start_ts
         df2.loc[index,'timestamp'] = t.total_seconds()
 
-    ax = df1.plot(x='timestamp',y='bits_per_sec',title='Bandwidth for {} at ms delay'.format(tcp_alg,delay),color='r')
-    df2.plot(ax = ax, x='timestamp',y='bits_per_sec',title='Bandwidth for {} at ms delay'.format(tcp_alg,delay))
+    ax = df1.plot(x='timestamp',y='bits_per_sec',title='Bandwidth for {} at {} ms delay'.format(tcp_alg,delay),color='r')
+    df2.plot(ax = ax, x='timestamp',y='bits_per_sec',title='Bandwidth for {} at {} ms delay'.format(tcp_alg,delay))
     plt.xlabel('Time (seconds)')
     plt.ylabel('Bandwidth (bps)')
     plt.legend(['Source1->Host1','Source2->Host2'],loc = 'upper right')
