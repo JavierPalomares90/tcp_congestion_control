@@ -114,11 +114,6 @@ def run_iperf(q, source, destination, duration_secs,portNum,tcp_alg,file_name):
     p1 = source.popen(cmd, shell=True)
     # return the p objects in the queue
     q.put([p1,p2])
-    # wait until command is done
-    (output, err) = p1.communicate()
-    p_status = p1.wait()
-    info('output:{}, err={},status={}'.format(output,err,p_status))
-    p2.kill()
 
 
 def start_tcp_probe(file_name):
