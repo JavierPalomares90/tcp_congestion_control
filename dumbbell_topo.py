@@ -156,7 +156,7 @@ def dumbbell_test(tcp_alg,delay):
     q1 = Queue()
     q2 = Queue()
 
-    now = str(dt.now())
+    now = str(dt.datetime.now())
     # Get a proc pool to transmit src1->dest1, src2->dest2
     p1 = Process(target=run_iperf,args=(q1,src1,dest1,trans_len_sec,5001,tcp_alg,iperf_file_name1))
     p2 = Process(target=run_iperf,args=(q2,src2,dest2,trans_len_sec,5002,tcp_alg,iperf_file_name2))
@@ -167,7 +167,7 @@ def dumbbell_test(tcp_alg,delay):
     # wait for SECOND_TRANSMISSION_DELAY_SECS before starting the second transmission
     time.sleep(SECOND_TRANSMISSION_DELAY_SECS)
     p2.start()
-    now = str(dt.now())
+    now = str(dt.datetime.now())
     info("{} Conn 2 started\n".format(now))
 
     # get the popens from each of the 2 iperf runs
@@ -176,7 +176,7 @@ def dumbbell_test(tcp_alg,delay):
     # wait until connection 1 is done
     (output, err) = popen1.communicate()
     p_status = popen1.wait()
-    now = str(dt.now())
+    now = str(dt.datetime.now())
     info('{} Connection 1 Finished. output:{}, err={},status={}'.format(now,output,err,p_status))
     popen2.kill()
 
@@ -186,7 +186,7 @@ def dumbbell_test(tcp_alg,delay):
     # wait until connection 2 is done
     (output, err) = popen3.communicate()
     p_status = popen3.wait()
-    now = str(dt.now())
+    now = str(dt.datetime.now())
     info('{} Connection 2 Finished. output:{}, err={},status={}'.format(now,output,err,p_status))
     popen4.kill()
     info("Transmission complete. Shutting down\n")
