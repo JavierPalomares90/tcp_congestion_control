@@ -23,12 +23,12 @@ LONG_DELAY =  162
 DELAYS = [SHORT_DELAY]
 PORT = 5001
 
-SECOND_TRANSMISSION_DELAY_SECS = 2
+SECOND_TRANSMISSION_DELAY_SECS = 250
 
 TCP_ALGS=['reno','cubic','bic','westwood']
 
 # how long iperf transmits in seconds
-TRANSMISSION_DURATION_SECS = 10
+TRANSMISSION_DURATION_SECS = 1000
 
 MILLIS_TO_SEC = 1000
 B_TO_MB = 1.0 / (10e6)
@@ -152,7 +152,6 @@ def dumbbell_test(tcp_alg,delay):
     info("{} Conn 1 started. Waiting for {} secs for conn 2\n".format(now,SECOND_TRANSMISSION_DELAY_SECS))
     # wait for SECOND_TRANSMISSION_DELAY_SECS before starting the second transmission
     time.sleep(SECOND_TRANSMISSION_DELAY_SECS)
-    now = str(dt.datetime.now())
     p3,p4 = run_iperf(src2,dest2,trans_len_sec,5002,tcp_alg,iperf_file_name2)
     now = str(dt.datetime.now())
     info("{} Conn 2 started\n".format(now))
