@@ -162,14 +162,14 @@ def dumbbell_test(tcp_alg,delay):
     (output, err) = p1.communicate()
     p_status = p1.wait()
     now = str(dt.datetime.now())
-    info('{} Connection 1 Finished. output:{}, err={},status={}'.format(now,output,err,p_status))
+    info('{} Connection 1 Finished. output:{}, err={},status={}\n'.format(now,output,err,p_status))
     p2.kill()
 
     # wait until connection 2 is done
     (output, err) = p3.communicate()
     p_status = p3.wait()
     now = str(dt.datetime.now())
-    info('{} Connection 2 Finished. output:{}, err={},status={}'.format(now,output,err,p_status))
+    info('{} Connection 2 Finished. output:{}, err={},status={}\n'.format(now,output,err,p_status))
     p4.kill()
     info("Transmission complete. Shutting down\n")
 
