@@ -8,14 +8,14 @@ from datetime import datetime as dt
 SHORT_DELAY =  21
 MEDIUM_DELAY = 81
 LONG_DELAY =  162
-DELAYS = [SHORT_DELAY, MEDIUM_DELAY, LONG_DELAY]
+DELAYS = [SHORT_DELAY]
 
-TCP_ALGS=['reno','cubic','bic','westwood']
+TCP_ALGS=['reno']
 TIMESTAMP_FORMAT='%Y%m%d%H%M%S'
 BPS_TO_MBPS = 1024*1024
 
 def plot_tcp_data(tcp_alg,delay):
-    file_name = './data/tcp_probe_{}_{}_ms_delay.txt'.format(tcp_alg,delay)
+    file_name = './data_100/tcp_probe_{}_{}_ms_delay.txt'.format(tcp_alg,delay)
     column_names = ['Time','Sender','Receiver','Bytes','Next','Unacknowledged','Cwnd','Slow_Start_Thresh','Send_window','rtt','Receive_Window']
     # the time and cwnd for each of the 2 path
     # path one 10.0.0.3 <-> 10.0.0.1 s1<->r1
@@ -39,8 +39,8 @@ def plot_tcp_data(tcp_alg,delay):
 
 
 def plot_iperf_data(tcp_alg,delay):
-    iperf_file_name1 = "./data/iperf_{}_{}_ms_delay_1.txt".format(tcp_alg,delay)
-    iperf_file_name2 = "./data/iperf_{}_{}_ms_delay_2.txt".format(tcp_alg,delay)
+    iperf_file_name1 = "./data_100/iperf_{}_{}_ms_delay_1.txt".format(tcp_alg,delay)
+    iperf_file_name2 = "./data_100/iperf_{}_{}_ms_delay_2.txt".format(tcp_alg,delay)
     column_names = ['timestamp','source_ip','source_port','destination_ip','destination_port','group_ID','interval','transferred_bytes','bits_per_sec']
     df1 = pd.read_csv(iperf_file_name1,names=column_names)
     df2 = pd.read_csv(iperf_file_name2,names=column_names)
@@ -69,7 +69,7 @@ def plot_iperf_data(tcp_alg,delay):
     ax = df1.plot(x='timestamp',y='bits_per_sec',title='Bandwidth for {} at {} ms delay'.format(tcp_alg,delay),color='r')
     df2.plot(ax = ax, x='timestamp',y='bits_per_sec',title='Bandwidth for {} at {} ms delay'.format(tcp_alg,delay))
     plt.xlabel('Time (seconds)')
-    plt.ylabel('Bandwidth (bps)')
+    plt.ylabel('Bandwidth (Mbps)')
     plt.legend(['Source1->Host1','Source2->Host2'],loc = 'upper right')
     save_file = "bandwidth_{}_{}_ms_delay.png".format(tcp_alg,delay)
     plt.savefig(save_file)
