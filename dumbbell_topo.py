@@ -20,15 +20,15 @@ import datetime as dt
 SHORT_DELAY =  21
 MEDIUM_DELAY = 81
 LONG_DELAY =  162
-DELAYS = [SHORT_DELAY, MEDIUM_DELAY, LONG_DELAY]
+DELAYS = [SHORT_DELAY]
 PORT = 5001
 
-SECOND_TRANSMISSION_DELAY_SECS = 25
+SECOND_TRANSMISSION_DELAY_SECS = 2
 
 TCP_ALGS=['reno','cubic','bic','westwood']
 
 # how long iperf transmits in seconds
-TRANSMISSION_DURATION_SECS = 100
+TRANSMISSION_DURATION_SECS = 10
 
 MILLIS_TO_SEC = 1000
 B_TO_MB = 1.0 / (10e6)
@@ -101,7 +101,7 @@ class Dumbbell(Topo):
         # use the propagation delay provided at construction and the hardcoded speed
         self.addLink(backbone_router_1,backbone_router_2, bw = backbone_router_speed_Mbps, delay=d)
 
-def run_iperf(q, source, destination, duration_secs,portNum,tcp_alg,file_name):
+def run_iperf(source, destination, duration_secs,portNum,tcp_alg,file_name):
     info('Starting iperf from source {} to destination {} on port {}\n'.format(source,destination,portNum))
     p2 = destination.popen('iperf -s -p {}&'.format(portNum),shell=True)
 
@@ -111,7 +111,7 @@ def run_iperf(q, source, destination, duration_secs,portNum,tcp_alg,file_name):
     info('Source executing:{}\n'.format(cmd))
     p1 = source.popen(cmd, shell=True)
     # return the p objects in the queue
-    q.put([p1,p2])
+    return p1,p2
 
 
 def start_tcp_probe(file_name):
@@ -145,45 +145,32 @@ def dumbbell_test(tcp_alg,delay):
     dest1 = net.hosts[2]
     dest2 = net.hosts[3]
     trans_len_sec = TRANSMISSION_DURATION_SECS
-    q1 = Queue()
-    q2 = Queue()
 
     now = str(dt.datetime.now())
     # Get a proc pool to transmit src1->dest1, src2->dest2
-    p1 = Process(target=run_iperf,args=(q1,src1,dest1,trans_len_sec,5001,tcp_alg,iperf_file_name1))
-    p2 = Process(target=run_iperf,args=(q2,src2,dest2,trans_len_sec,5002,tcp_alg,iperf_file_name2))
-
-
+    p1,p2 = run_iperf(src1,dest1,trans_len_sec,5001,tcp_alg,iperf_file_name1)
     info("{} Conn 1 started. Waiting for {} secs for conn 2\n".format(now,SECOND_TRANSMISSION_DELAY_SECS))
-    p1.start()
     # wait for SECOND_TRANSMISSION_DELAY_SECS before starting the second transmission
     time.sleep(SECOND_TRANSMISSION_DELAY_SECS)
-    p2.start()
+    now = str(dt.datetime.now())
+    p3,p4 = run_iperf(src2,dest2,trans_len_sec,5002,tcp_alg,iperf_file_name2)
     now = str(dt.datetime.now())
     info("{} Conn 2 started\n".format(now))
 
-    # get the popens from each of the 2 iperf runs
-    popens1 = q1.get()
-    popen1 = popens1[0]
-    popen2 = popens1[1]
-
-    popens2 = q2.get()
-    popen3 = popens2[0]
-    popen4 = popens2[1]
 
     # wait until connection 1 is done
-    (output, err) = popen1.communicate()
-    p_status = popen1.wait()
+    (output, err) = p1.communicate()
+    p_status = p1.wait()
     now = str(dt.datetime.now())
     info('{} Connection 1 Finished. output:{}, err={},status={}'.format(now,output,err,p_status))
-    popen2.kill()
+    p2.kill()
 
     # wait until connection 2 is done
-    (output, err) = popen3.communicate()
-    p_status = popen3.wait()
+    (output, err) = p3.communicate()
+    p_status = p3.wait()
     now = str(dt.datetime.now())
     info('{} Connection 2 Finished. output:{}, err={},status={}'.format(now,output,err,p_status))
-    popen4.kill()
+    p4.kill()
     info("Transmission complete. Shutting down\n")
 
     net.stop()
