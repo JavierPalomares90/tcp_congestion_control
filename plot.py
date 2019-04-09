@@ -8,9 +8,9 @@ from datetime import datetime as dt
 SHORT_DELAY =  21
 MEDIUM_DELAY = 81
 LONG_DELAY =  162
-DELAYS = [SHORT_DELAY]
+DELAYS = [SHORT_DELAY,MEDIUM_DELAY,LONG_DELAY]
 
-TCP_ALGS=['reno']
+TCP_ALGS=['reno','cubic','bic','westwood']
 TIMESTAMP_FORMAT='%Y%m%d%H%M%S'
 BPS_TO_MBPS = 1024*1024
 
