@@ -10,7 +10,7 @@ from mininet.link import TCLink
 from mininet.log import setLogLevel
 from mininet.log import lg, info
 from mininet.util import irange, quietRun
-from multiprocessing import Process
+from multiprocessing import Process,Queue
 import os
 import time
 from subprocess import Popen
@@ -22,12 +22,12 @@ LONG_DELAY =  162
 DELAYS = [SHORT_DELAY, MEDIUM_DELAY, LONG_DELAY]
 PORT = 5001
 
-SECOND_TRANSMISSION_DELAY_SECS = 250
+SECOND_TRANSMISSION_DELAY_SECS = 25
 
 TCP_ALGS=['reno','cubic','bic','westwood']
 
 # how long iperf transmits in seconds
-TRANSMISSION_DURATION_SECS = 1000
+TRANSMISSION_DURATION_SECS = 100
 
 MILLIS_TO_SEC = 1000
 B_TO_MB = 1.0 / (10e6)
@@ -100,7 +100,7 @@ class Dumbbell(Topo):
         # use the propagation delay provided at construction and the hardcoded speed
         self.addLink(backbone_router_1,backbone_router_2, bw = backbone_router_speed_Mbps, delay=d)
 
-def run_iperf(mininet, source, destination, duration_secs,portNum,tcp_alg,file_name):
+def run_iperf(q, source, destination, duration_secs,portNum,tcp_alg,file_name):
     info('Starting iperf from source {} to destination {}\n'.format(source,destination))
     info('Starting the destination on port {}\n'.format(portNum))
     p2 = destination.popen('iperf -s -p {}&'.format(portNum),shell=True)
@@ -108,15 +108,15 @@ def run_iperf(mininet, source, destination, duration_secs,portNum,tcp_alg,file_n
     info('Starting the source\n')
     # may have to use popen instead
     destinationIP = destination.IP()
-    cmd = 'iperf -c {} -p {} -i 1 -w 16m -Z {} -t {} -y c'.format(destinationIP,portNum,tcp_alg,duration_secs)
-    f = open(file_name,'w')
+    cmd = 'iperf -c {} -p {} -i 1 -w 16m -Z {} -t {} -y c > {}'.format(destinationIP,portNum,tcp_alg,duration_secs,file_name)
     info('Source executing:{}\n'.format(cmd))
-    p = source.popen(cmd, stdout=f)
+    p1 = source.popen(cmd, shell=True)
+    # return the p objects in the queue
+    q.put([p1,p2])
     # wait until command is done
-    (output, err) = p.communicate()
-    p_status = p.wait()
+    (output, err) = p1.communicate()
+    p_status = p1.wait()
     info('output:{}, err={},status={}'.format(output,err,p_status))
-    f.close()
     p2.kill()
 
 
@@ -153,10 +153,12 @@ def dumbbell_test(tcp_alg,delay):
     dest2 = net.hosts[3]
     trans_len_sec = TRANSMISSION_DURATION_SECS
     info("Transmitting for {} seconds.\n".format(trans_len_sec))
+    q1 = Queue()
+    q2 = Queue()
 
     # Get a proc pool to transmit src1->dest1, src2->dest2
-    p1 = Process(target=run_iperf,args=(net,src1,dest1,trans_len_sec,5001,tcp_alg,iperf_file_name1))
-    p2 = Process(target=run_iperf,args=(net,src2,dest2,trans_len_sec,5002,tcp_alg,iperf_file_name2))
+    p1 = Process(target=run_iperf,args=(q1,src1,dest1,trans_len_sec,5001,tcp_alg,iperf_file_name1))
+    p2 = Process(target=run_iperf,args=(q2,src2,dest2,trans_len_sec,5002,tcp_alg,iperf_file_name2))
 
 
     p1.start()
@@ -164,9 +166,24 @@ def dumbbell_test(tcp_alg,delay):
     # wait for SECOND_TRANSMISSION_DELAY_SECS before starting the second transmission
     time.sleep(SECOND_TRANSMISSION_DELAY_SECS)
     p2.start()
-    # wait for the 2 threads to finish before calling .stop()
-    p1.join()
-    p2.join()
+
+    # get the popens from each of the 2 iperf runs
+    popen1 = q1.get()[0]
+    popen2 = q1.get()[1]
+    # wait until connection 1 is done
+    (output, err) = popen1.communicate()
+    p_status = popen1.wait()
+    info('output:{}, err={},status={}'.format(output,err,p_status))
+    popen2.kill()
+
+    popen3 = q2.get()[0]
+    popen4 = q2.get()[1]
+
+    # wait until connection 2 is done
+    (output, err) = popen3.communicate()
+    p_status = popen3.wait()
+    info('output:{}, err={},status={}'.format(output,err,p_status))
+    popen4.kill()
     info("Transmission complete. Shutting down\n")
 
     net.stop()
